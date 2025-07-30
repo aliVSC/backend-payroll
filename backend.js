@@ -4,8 +4,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
-
 
 const app = express();
 app.use(cors());
@@ -14,7 +14,6 @@ app.use(bodyParser.json());
 app.post('/descargarRecibo', async (req, res) => {
   const datos = req.body;
 
-  // Generar PDF con ReportLab o PDFKit
   const doc = new PDFDocument();
   const filename = `recibo_${Date.now()}.pdf`;
   const filepath = path.join(__dirname, filename);
@@ -32,11 +31,10 @@ app.post('/descargarRecibo', async (req, res) => {
 
   stream.on('finish', () => {
     res.download(filepath, filename, () => {
-      fs.unlinkSync(filepath); // Borra el archivo después de descargar
+      fs.unlinkSync(filepath);
     });
   });
 });
-
 
 app.post("/send-pdf", async (req, res) => {
   const {
@@ -60,21 +58,23 @@ app.post("/send-pdf", async (req, res) => {
   console.log("empleado:", empleado);
   console.log("sueldo_base:", sueldo_base);
 
+  if (!correoDestino || correoDestino.trim() === "") {
+    console.error("❌ Error: correoDestino está vacío.");
+    return res.status(400).send({ success: false, message: "Correo destinatario no válido." });
+  }
+
   const pdfPath = `recibo_${Date.now()}.pdf`;
   const doc = new PDFDocument();
   const stream = fs.createWriteStream(pdfPath);
   doc.pipe(stream);
 
-  // TÍTULO
   doc.fontSize(20).text("ROL DE PAGOS", { align: "center" });
   doc.moveDown();
 
-  // DATOS DEL EMPLEADO
   doc.fontSize(12).text(`👤 Empleado: ${empleado}`);
   doc.text(`💼 Cargo: ${cargo}`);
   doc.moveDown();
 
-  // DETALLES FINANCIEROS
   doc.text(`💰 Sueldo base: $${sueldo_base}`);
   doc.text(`⏱️ Horas extras: $${horas_extras}`);
   doc.text(`🎁 Bonificaciones: $${bonificaciones}`);
@@ -86,11 +86,9 @@ app.post("/send-pdf", async (req, res) => {
   doc.text(`📈 Ingresos adicionales: $${ingresos_adicionales}`);
   doc.moveDown();
 
-  // TOTAL
   doc.font("Helvetica-Bold").text(`🟢 Sueldo neto a pagar: $${sueldo_neto}`, { align: "center" });
   doc.moveDown();
 
-  // PIE DE PÁGINA
   doc.font("Helvetica").fontSize(10).text("📌 Este recibo ha sido generado automáticamente por PAYROLL.", {
     align: "center"
   });
@@ -120,17 +118,17 @@ app.post("/send-pdf", async (req, res) => {
         ]
       });
 
-      fs.unlinkSync(pdfPath); 
-
+      fs.unlinkSync(pdfPath);
       res.status(200).send({ success: true, message: "PDF enviado al correo del administrador." });
     } catch (error) {
-      console.error(error);
+      console.error("❌ Error al enviar correo:", error);
       res.status(500).send({ success: false, message: "Error al enviar el PDF." });
     }
   });
 });
 
 app.listen(3000, () => {
-  console.log("Servidor corriendo en http://localhost:3000");
+  console.log("🚀 Servidor corriendo en http://localhost:3000");
 });
+
 
