@@ -6,9 +6,37 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 require("dotenv").config();
 
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+
+app.post('/descargarRecibo', async (req, res) => {
+  const datos = req.body;
+
+  // Generar PDF con ReportLab o PDFKit
+  const doc = new PDFDocument();
+  const filename = `recibo_${Date.now()}.pdf`;
+  const filepath = path.join(__dirname, filename);
+  const stream = fs.createWriteStream(filepath);
+  doc.pipe(stream);
+
+  doc.fontSize(20).text('Recibo de Pago', { align: 'center' });
+  doc.moveDown();
+
+  Object.entries(datos).forEach(([key, value]) => {
+    doc.fontSize(12).text(`${key}: ${value}`);
+  });
+
+  doc.end();
+
+  stream.on('finish', () => {
+    res.download(filepath, filename, () => {
+      fs.unlinkSync(filepath); // Borra el archivo después de descargar
+    });
+  });
+});
+
 
 app.post("/send-pdf", async (req, res) => {
   const {
@@ -26,6 +54,11 @@ app.post("/send-pdf", async (req, res) => {
     ingresos_adicionales,
     sueldo_neto
   } = req.body;
+
+  console.log("==== DATOS RECIBIDOS ====");
+  console.log("correoDestino:", correoDestino);
+  console.log("empleado:", empleado);
+  console.log("sueldo_base:", sueldo_base);
 
   const pdfPath = `recibo_${Date.now()}.pdf`;
   const doc = new PDFDocument();
