@@ -75,18 +75,18 @@ app.post("/send-pdf", async (req, res) => {
   doc.text(`💼 Cargo: ${cargo}`);
   doc.moveDown();
 
-  doc.text(`💰 Sueldo base: $${sueldo_base}`);
-  doc.text(`⏱️ Horas extras: $${horas_extras}`);
-  doc.text(`🎁 Bonificaciones: $${bonificaciones}`);
-  doc.text(`⚠️ Multas: -$${multas}`);
-  doc.text(`🏥 IESS: -$${iess}`);
-  doc.text(`💵 Fondos de reserva: $${fondos_reserva}`);
-  doc.text(`📅 Décimo tercero: $${decimo_tercero}`);
-  doc.text(`📅 Décimo cuarto: $${decimo_cuarto}`);
-  doc.text(`📈 Ingresos adicionales: $${ingresos_adicionales}`);
+  doc.text(`💰 Sueldo base: ${sueldo_base}`);
+  doc.text(`⏱️ Horas extras: ${horas_extras}`);
+  doc.text(`🎁 Bonificaciones: ${bonificaciones}`);
+  doc.text(`⚠️ Multas: -${multas}`);
+  doc.text(`🏥 IESS: -${iess}`);
+  doc.text(`💵 Fondos de reserva: ${fondos_reserva}`);
+  doc.text(`📅 Décimo tercero: ${decimo_tercero}`);
+  doc.text(`📅 Décimo cuarto: ${decimo_cuarto}`);
+  doc.text(`📈 Ingresos adicionales: ${ingresos_adicionales}`);
   doc.moveDown();
 
-  doc.font("Helvetica-Bold").text(`🟢 Sueldo neto a pagar: $${sueldo_neto}`, { align: "center" });
+  doc.font("Helvetica-Bold").text(`🟢 Sueldo neto a pagar: ${sueldo_neto}`, { align: "center" });
   doc.moveDown();
 
   doc.font("Helvetica").fontSize(10).text("📌 Este recibo ha sido generado automáticamente por PAYROLL.", {
@@ -108,8 +108,8 @@ app.post("/send-pdf", async (req, res) => {
       await transporter.sendMail({
         from: `"PAYROLL" <${process.env.EMAIL_USER}>`,
         to: correoDestino,
-        subject: "📎 Recibo de Rol de Pagos en PDF",
-        text: `Hola, adjunto encontrarás el recibo del rol de pagos de ${empleado}.`,
+        subject: "Recibo de Rol de Pagos en PDF",
+        text: `Hola, adjunto encontrarás el recibo del rol de pagos del empleado seleccionado.`,
         attachments: [
           {
             filename: "RolDePagos.pdf",
